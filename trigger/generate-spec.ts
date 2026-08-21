@@ -66,7 +66,7 @@ function buildContext(nodes: Node[], edges: Edge[], chatHistory: ChatMessage[]):
     .join("\n")
 
   const chatLines = chatHistory
-    .map((m) => `${m.role === "user" ? "User" : "Ghost AI"}: ${m.content}`)
+    .map((m) => `${m.role === "user" ? "User" : "Techy AI"}: ${m.content}`)
     .join("\n")
 
   return [
@@ -81,7 +81,7 @@ function buildContext(nodes: Node[], edges: Edge[], chatHistory: ChatMessage[]):
   ].join("\n")
 }
 
-const SYSTEM_PROMPT = `You are Ghost AI, a senior technical architect. Generate a comprehensive Markdown technical specification document based on the provided architecture canvas and conversation context.
+const SYSTEM_PROMPT = `You are Techy AI, a senior technical architect. Generate a comprehensive Markdown technical specification document based on the provided architecture canvas and conversation context.
 
 Structure the spec as follows:
 1. **Overview** — What the system does and its key goals

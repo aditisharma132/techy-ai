@@ -180,10 +180,10 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
       const typedOutput = output as { summary?: string } | undefined
       const content = isSuccess
         ? (typedOutput?.summary ?? "Design applied to canvas.")
-        : "Ghost AI encountered an error. Please try again."
+        : "Techy AI encountered an error. Please try again."
 
       createFeedMessage(CHAT_FEED_ID, {
-        sender: "Ghost AI",
+        sender: "Techy AI",
         role: "assistant",
         content,
         timestamp: new Date().toISOString(),
@@ -301,11 +301,11 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
 
     // Write initial status to ai-status-feed
     createFeedMessage(FEED_ID, {
-      text: "Ghost AI is analyzing your request…",
+      text: "Techy AI is analyzing your request…",
       status: "start",
     }).catch(() => {})
 
-    setStatusText("Ghost AI is analyzing your request…")
+    setStatusText("Techy AI is analyzing your request…")
 
     try {
       const designRes = await fetch("/api/ai/design", {
@@ -332,14 +332,14 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
       setPublicToken(token)
     } catch {
       createFeedMessage(CHAT_FEED_ID, {
-        sender: "Ghost AI",
+        sender: "Techy AI",
         role: "assistant",
-        content: "Failed to reach Ghost AI. Please try again.",
+        content: "Failed to reach Techy AI. Please try again.",
         timestamp: new Date().toISOString(),
       }).catch(() => {})
 
       createFeedMessage(FEED_ID, {
-        text: "Ghost AI encountered an error.",
+        text: "Techy AI encountered an error.",
         status: "error",
       }).catch(() => {})
 
@@ -538,7 +538,7 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-text-primary">AI Workspace</p>
-          <p className="text-xs text-text-muted">Collaborate with Ghost AI</p>
+          <p className="text-xs text-text-muted">Collaborate with Techy AI</p>
         </div>
         {isLoading && (
           <div className="flex items-center gap-1 rounded-full bg-accent-ai/15 px-2 py-0.5 text-[10px] text-accent-ai-text">
@@ -589,7 +589,7 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
                     </div>
                     <div>
                       <p className="text-sm font-medium text-text-primary">
-                        Ghost AI Architect
+                        Techy AI Architect
                       </p>
                       <p className="mt-1 text-xs leading-5 text-text-muted">
                         Describe your system and I&apos;ll design the architecture on the canvas.
@@ -720,7 +720,7 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
                             )}
                           >
                             <span className="font-medium text-text-muted">
-                              {isAI ? "Ghost AI" : msg.sender}
+                              {isAI ? "Techy AI" : msg.sender}
                             </span>
                             <span>{formatTime(msg.createdAt)}</span>
                           </div>

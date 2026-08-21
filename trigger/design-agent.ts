@@ -8,8 +8,8 @@ import { getLiveblocks } from "@/lib/liveblocks";
 import { NODE_COLORS, SHAPE_DEFAULTS, NODE_SHAPES } from "@/types/canvas";
 import type { CanvasNode, CanvasEdge, NodeShape } from "@/types/canvas";
 
-const AI_USER_ID = "ghost-ai";
-const AI_USER_INFO = { name: "Ghost AI", avatar: "", color: "#6457f9" };
+const AI_USER_ID = "techy-ai";
+const AI_USER_INFO = { name: "Techy AI", avatar: "", color: "#6457f9" };
 
 const NODE_SYNC_CONFIG = {
   selected: false,
@@ -39,7 +39,7 @@ function buildSystemPrompt(): string {
     (c, i) => `  ${i} (${COLOR_NAMES[i]}): fill=${c.fill} text=${c.text}`
   ).join("\n");
 
-  return `You are Ghost AI, an expert system architect that generates technical architecture diagrams on a collaborative canvas.
+  return `You are Techy AI, an expert system architect that generates technical architecture diagrams on a collaborative canvas.
 
 ALLOWED SHAPES (use exact value):
 - rectangle  → services, APIs, microservices, components
@@ -172,7 +172,7 @@ export const designAgent = task({
     await lb
       .broadcastEvent(payload.roomId, {
         type: "ai-status",
-        message: "Ghost AI is analyzing your request…",
+        message: "Techy AI is analyzing your request…",
         status: "start",
       })
       .catch(() => {});
@@ -240,7 +240,7 @@ export const designAgent = task({
       await lb
         .broadcastEvent(payload.roomId, {
           type: "ai-status",
-          message: "Ghost AI encountered an error. Please try again.",
+          message: "Techy AI encountered an error. Please try again.",
           status: "error",
         })
         .catch(() => {});

@@ -33,11 +33,11 @@ export default function SignInPage() {
                 className="text-bg-base font-bold text-xs leading-none"
                 style={{ fontFamily: "var(--font-geist-sans)" }}
               >
-                G
+                T
               </span>
             </div>
             <span className="text-sm font-semibold text-text-primary">
-              Ghost AI
+              Techy AI
             </span>
           </div>
         </div>
@@ -49,7 +49,7 @@ export default function SignInPage() {
             speed of thought.
           </h1>
           <p className="text-text-secondary text-base leading-relaxed mb-12 max-w-sm">
-            Describe your architecture in plain English. Ghost AI maps it to a
+            Describe your architecture in plain English. Techy AI maps it to a
             shared canvas your whole team can refine in real time.
           </p>
 
@@ -74,7 +74,7 @@ export default function SignInPage() {
 
         <div className="px-12 pb-10">
           <p className="text-xs text-text-faint">
-            © 2026 Ghost AI. All rights reserved.
+            © 2026 Techy AI. All rights reserved.
           </p>
         </div>
       </div>
