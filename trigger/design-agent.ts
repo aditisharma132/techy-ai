@@ -158,7 +158,7 @@ export const designAgent = task({
   retry: { maxAttempts: 2 },
   run: async (payload: { prompt: string; roomId: string; userId: string }) => {
     const lb = getLiveblocks();
-    const google = createGoogleGenerativeAI({ apiKey: process.env.GOOGLE_AI_API_KEY });
+    const google = createGoogleGenerativeAI({ apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GOOGLE_AI_API_KEY });
 
     await lb
       .setPresence(payload.roomId, {
@@ -193,7 +193,7 @@ export const designAgent = task({
       }
 
       const result = await generateText({
-        model: google("gemini-3.6-flash"),
+        model: google(process.env.GEMINI_MODEL || "gemini-2.0-flash"),
         system: buildSystemPrompt(),
         prompt: `User request: ${payload.prompt}\n\n${canvasContext}`,
         tools: canvasTools,

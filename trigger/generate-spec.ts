@@ -98,7 +98,7 @@ export const generateSpec = schemaTask({
   schema: payloadSchema,
   retry: { maxAttempts: 2, minTimeoutInMs: 1000, maxTimeoutInMs: 10000, factor: 2 },
   run: async (payload) => {
-    const google = createGoogleGenerativeAI({ apiKey: process.env.GOOGLE_AI_API_KEY })
+    const google = createGoogleGenerativeAI({ apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GOOGLE_AI_API_KEY })
 
     metadata.set("status", "starting")
     logger.info("Generating spec", {
@@ -112,7 +112,7 @@ export const generateSpec = schemaTask({
     const context = buildContext(payload.nodes, payload.edges, payload.chatHistory)
 
     const result = await generateText({
-      model: google("gemini-3.6-flash"),
+      model: google(process.env.GEMINI_SPEC_MODEL || process.env.GEMINI_MODEL || "gemini-2.0-flash"),
       system: SYSTEM_PROMPT,
       prompt: context,
     })
