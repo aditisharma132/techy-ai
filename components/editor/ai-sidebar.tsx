@@ -540,9 +540,17 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
         </DialogContent>
       </Dialog>
 
+    {isOpen && (
+      <div
+        className="fixed inset-0 z-40 bg-bg-base/70 backdrop-blur-sm md:hidden"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+    )}
+
     <aside
       className={cn(
-        "fixed inset-y-3 right-3 top-15 z-40 hidden w-84 flex-col rounded-3xl border border-border-subtle bg-bg-surface/95 backdrop-blur-xl transition-transform duration-200 md:flex",
+        "fixed inset-x-3 top-15 bottom-3 z-50 flex flex-col rounded-3xl border border-border-subtle bg-bg-surface/95 backdrop-blur-xl transition-transform duration-200 md:inset-x-auto md:right-3 md:w-84",
         isOpen ? "translate-x-0" : "translate-x-[calc(100%+1rem)]"
       )}
     >
