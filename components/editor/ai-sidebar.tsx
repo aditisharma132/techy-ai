@@ -123,6 +123,7 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
   const [isSpecGenerating, setIsSpecGenerating] = useState(false)
   const [specRunId, setSpecRunId] = useState<string | null>(null)
   const [specPublicToken, setSpecPublicToken] = useState<string | null>(null)
+  const [specError, setSpecError] = useState<string | null>(null)
 
   // Canvas storage for spec generation context
   // useStorage immutably serializes LiveMap as a plain readonly object, so use Object.values
@@ -169,7 +170,11 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
       setIsSpecGenerating(false)
       setSpecRunId(null)
       setSpecPublicToken(null)
-      if (status === "COMPLETED") fetchSpecs()
+      if (status === "COMPLETED") {
+        fetchSpecs()
+      } else {
+        setSpecError(`Spec generation ${status.toLowerCase()}. Please try again.`)
+      }
     },
     [fetchSpecs]
   )
@@ -224,6 +229,7 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
   const handleGenerateSpec = useCallback(async () => {
     if (isSpecGenerating) return
     setIsSpecGenerating(true)
+    setSpecError(null)
 
     const nodes = nodesArray ?? []
     const edges = edgesArray ?? []
@@ -238,7 +244,11 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId, chatHistory, nodes, edges }),
       })
-      if (!res.ok) throw new Error("Spec generation failed")
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        const message = typeof body?.error === "string" ? body.error : `Spec generation failed (${res.status})`
+        throw new Error(message)
+      }
       const { runId: newSpecRunId } = (await res.json()) as { runId: string }
 
       const tokenRes = await fetch("/api/ai/spec/token", {
@@ -246,13 +256,18 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ runId: newSpecRunId }),
       })
-      if (!tokenRes.ok) throw new Error("Token request failed")
+      if (!tokenRes.ok) {
+        const body = await tokenRes.json().catch(() => ({}))
+        const message = typeof body?.error === "string" ? body.error : `Token request failed (${tokenRes.status})`
+        throw new Error(message)
+      }
       const { token } = (await tokenRes.json()) as { token: string }
 
       setSpecRunId(newSpecRunId)
       setSpecPublicToken(token)
-    } catch {
+    } catch (err) {
       setIsSpecGenerating(false)
+      setSpecError(err instanceof Error ? err.message : "Spec generation failed. Please try again.")
     }
   }, [isSpecGenerating, roomId, nodesArray, edgesArray, validatedChatMessages])
 
@@ -798,6 +813,12 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
                 "Generate Spec"
               )}
             </Button>
+
+            {specError && (
+              <p className="rounded-lg border border-state-error/40 bg-state-error/10 px-3 py-2 text-xs text-state-error">
+                {specError}
+              </p>
+            )}
 
             {specsLoading ? (
               <div className="flex flex-1 items-center justify-center">
