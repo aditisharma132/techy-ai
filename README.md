@@ -72,6 +72,8 @@ If you're getting started and need assistance or face any bugs, join our active 
 
 - **[PostgreSQL](https://www.postgresql.org/)** is an advanced, open-source object-relational database system widely recognized for its reliability, extensibility, and standard compliance. It provides the persistent storage layer for your application, supporting complex queries, transactional integrity, and large-scale data handling.
 
+- **[Vercel Blob](https://vercel.com/docs/storage/vercel-blob)** is object storage for files served from Vercel's edge network. It stores generated specs and autosaved canvas JSON here, keyed by project ID.
+
 - **[Tailwind CSS](https://tailwindcss.com/)** is a utility-first CSS framework that enables rapid custom UI development. By utilizing low-level utility classes directly in your markup, it removes the need to switch between CSS and HTML files, allowing for highly consistent and responsive design systems.
 
 - **[shadcn/ui](https://ui.shadcn.com/)** is a collection of beautifully designed, accessible, and re-usable UI components that you can copy and paste directly into your projects. Built on top of Radix UI and Tailwind CSS, it grants you full control over your component code, avoiding the bloat of traditional component libraries.
@@ -88,13 +90,13 @@ If you're getting started and need assistance or face any bugs, join our active 
 
 👉 **AI Spec Generation**: One click converts the current graph into a detailed Markdown technical specification using a second Gemini-powered Trigger.dev task.
 
-👉 **Multi-Spec Storage**: Each project stores multiple specs. Metadata lives in PostgreSQL (Prisma); content is stored as Markdown files on disk (`data/specs/{projectId}/{specId}.md`).
+👉 **Multi-Spec Storage**: Each project stores multiple specs. Metadata lives in PostgreSQL (Prisma); Markdown content is uploaded to Vercel Blob (`specs/{projectId}/{timestamp}.md`).
 
 👉 **Downloadable Specs**: Every generated spec is available via a dedicated download API route.
 
 👉 **Clerk Authentication**: Global route protection via `clerkMiddleware`; Liveblocks tokens are only issued to authenticated users.
 
-👉 **Auto-Save Canvas**: The canvas state is debounced-saved to `data/canvas/{projectId}.json` every 3 seconds of inactivity.
+👉 **Auto-Save Canvas**: The canvas state is debounced-saved to Vercel Blob (`canvas/{projectId}.json`) shortly after each change.
 
 👉 **Project Management**: Create projects from a slide-in sidebar; project slugs auto-generate room IDs; the active room is highlighted.
 
@@ -144,22 +146,28 @@ LIVEBLOCKS_SECRET_KEY=
 
 TRIGGER_SECRET_KEY=
 NEXT_PUBLIC_TRIGGER_PUBLIC_API_KEY=
+# Required to run `npx trigger.dev deploy` / `dev` — find it on your
+# project's dashboard at cloud.trigger.dev (looks like proj_xxxxxxxx)
+TRIGGER_PROJECT_REF=
 
 DATABASE_URL=
 
-━━━━━━━━━━━━━━━━━━━━
+# Required for canvas autosave and spec uploads (Vercel Blob)
+BLOB_READ_WRITE_TOKEN=
+
 # Google
-GOOGLE_GENERATIVE_AI_API_KEY=
-# Optional: override the default Gemini model (default: gemini-2.0-flash)
+GOOGLE_AI_API_KEY=
+# Optional: override the default Gemini model (default: gemini-3.6-flash)
 GEMINI_MODEL=
 # Optional: override model used specifically for spec generation
 GEMINI_SPEC_MODEL=
 
-━━━━━━━━━━━━━━━━━━━━
 APP_URL=http://localhost:3000
 ```
 
-Replace the placeholder values with your real credentials. You can get these by signing up at: [**Clerk**](https://jsm.dev/ghost-clerk), [**Liveblocks**](https://jsm.dev/ghost-liveblocks), [**Trigger.dev**](https://jsm.dev/ghost-triggerdev), [**Google AI Studio**](https://aistudio.google.com/).
+Replace the placeholder values with your real credentials. You can get these by signing up at: [**Clerk**](https://jsm.dev/ghost-clerk), [**Liveblocks**](https://jsm.dev/ghost-liveblocks), [**Trigger.dev**](https://jsm.dev/ghost-triggerdev), [**Google AI Studio**](https://aistudio.google.com/). `BLOB_READ_WRITE_TOKEN` is created automatically when you attach a Blob store to your Vercel project (Storage tab → Create Database → Blob).
+
+> **Note on `TRIGGER_SECRET_KEY`**: Trigger.dev has separate Development and Production environment keys (`tr_dev_...` / `tr_prod_...`). A `tr_dev_` key only works while `npx trigger.dev dev` is running locally on your machine — for a deployed app, use the Production key and run `npx trigger.dev deploy` first so your tasks actually exist in that environment.
 
 **Running the Project**
 
@@ -177,18 +185,38 @@ In a second terminal, start the Trigger.dev dev worker so background AI tasks ex
 npx trigger.dev@latest dev
 ```
 
+## Deploying to Production
+
+Deploying the Next.js app (e.g. to Vercel) is **not enough on its own** — the two background tasks (`design-agent`, `generate-spec`) live on Trigger.dev's own infrastructure and need to be deployed there separately:
+
+```bash
+npx trigger.dev@latest deploy
+```
+
+This requires `TRIGGER_PROJECT_REF` to be set (see above) and pushes your task code to Trigger.dev's **Production** environment. Two things that are easy to get wrong:
+
+- **Use the Production secret key, not the Development one.** Trigger.dev issues separate keys per environment (`tr_dev_...` vs `tr_prod_...`). A `tr_dev_` key only has anything to execute against while `npx trigger.dev dev` is running on your machine — it will not work against a task you `deploy`d, and it won't work at all from a deployed serverless app. Grab the Production key from your project's **API keys** page (switch the environment selector to Production first).
+- **The background tasks read their own environment variables** — separately from whatever you set in Vercel. `GOOGLE_AI_API_KEY`, `LIVEBLOCKS_SECRET_KEY`, `DATABASE_URL`, and `BLOB_READ_WRITE_TOKEN` all need to be set again in Trigger.dev's dashboard under **Environment variables** (Production environment), since the tasks run on Trigger.dev's servers, not Vercel's.
+
+If you also want to try Hugging Face Spaces (Docker SDK) as a host instead of Vercel, a working multi-stage `Dockerfile` is included at the repo root — the Docker SDK requires a payment method on file even for free-tier hardware, so Vercel is the simpler path if you'd rather avoid that.
+
 ## Available Scripts
 
-| Command                   | Description                           |
-| ------------------------- | ------------------------------------- |
-| `npm run dev`             | Start Next.js development server      |
-| `npm run build`           | Build for production                  |
-| `npm run start`           | Start production server               |
-| `npm run lint`            | Run ESLint                            |
-| `npm run prisma:generate` | Regenerate Prisma client              |
-| `npm run prisma:migrate`  | Create and apply a new migration      |
-| `npm run prisma:deploy`   | Apply pending migrations (production) |
-| `npm run prisma:studio`   | Open Prisma Studio GUI                |
+| Command         | Description                       |
+| --------------- | ---------------------------------- |
+| `npm run dev`   | Start Next.js development server  |
+| `npm run build` | Build for production              |
+| `npm run start` | Start production server           |
+| `npm run lint`  | Run ESLint                        |
+
+There are no `npm run prisma:*` shortcuts in this project — use the Prisma CLI directly:
+
+| Command                     | Description                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------- |
+| `npx prisma generate`       | Regenerate the Prisma client (also runs automatically after `npm install` via `postinstall`) |
+| `npx prisma migrate dev`    | Create and apply a new migration locally                                              |
+| `npx prisma migrate deploy` | Apply pending migrations (production database)                                        |
+| `npx prisma studio`         | Open Prisma Studio GUI                                                                 |
 
 ---
 
@@ -205,16 +233,14 @@ npx trigger.dev@latest dev
 ├── components/
 │   ├── editor/           # Canvas UI components (editor, sidebar, AI chat)
 │   └── ui/               # Reusable shadcn/ui primitives
-├── data/
-│   ├── canvas/           # Auto-saved React Flow graph JSON per project
-│   └── specs/            # Generated Markdown specs per project
 ├── docs/                 # Project documentation
 ├── hooks/                # Custom React hooks (auto-save, keyboard shortcuts)
 ├── lib/                  # Shared utilities (Prisma client, Liveblocks, AI agents)
 ├── prisma/               # Prisma schema and migrations
 ├── trigger/              # Trigger.dev background task definitions
 │   ├── design-agent.ts   # AI canvas generation task
-│   └── generate-spec-gemini.ts  # AI spec generation task
+│   └── generate-spec.ts  # AI spec generation task
+├── Dockerfile            # Multi-stage build for Docker-based hosts (e.g. Hugging Face Spaces)
 └── types/                # Shared TypeScript types
 ```
 
