@@ -69,6 +69,9 @@ interface RunTrackerProps {
   onTerminal: (status: string, output: unknown) => void
 }
 
+const POLL_FALLBACK_START_MS = 20_000
+const POLL_FALLBACK_INTERVAL_MS = 5_000
+
 function RunTracker({ runId, publicToken, onTerminal }: RunTrackerProps) {
   const { run } = useRealtimeRun(runId, { accessToken: publicToken })
   const firedRef = useRef(false)
@@ -79,6 +82,39 @@ function RunTracker({ runId, publicToken, onTerminal }: RunTrackerProps) {
     firedRef.current = true
     onTerminal(run.status, run.output)
   }, [run?.status, run?.id, onTerminal])
+
+  // Fallback for when the realtime subscription stalls (e.g. a dropped
+  // connection on mobile) — poll the run status directly so the UI never
+  // hangs on "Thinking…" indefinitely.
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | undefined
+
+    const startTimeout = setTimeout(() => {
+      interval = setInterval(async () => {
+        if (firedRef.current) {
+          clearInterval(interval)
+          return
+        }
+        try {
+          const res = await fetch(`/api/ai/runs/${runId}`)
+          if (!res.ok) return
+          const data = (await res.json()) as { status: string; output: unknown }
+          if (firedRef.current) return
+          if (!(TERMINAL_STATUSES as readonly string[]).includes(data.status)) return
+          firedRef.current = true
+          clearInterval(interval)
+          onTerminal(data.status, data.output)
+        } catch {
+          // transient network error — retry on the next tick
+        }
+      }, POLL_FALLBACK_INTERVAL_MS)
+    }, POLL_FALLBACK_START_MS)
+
+    return () => {
+      clearTimeout(startTimeout)
+      if (interval) clearInterval(interval)
+    }
+  }, [runId, onTerminal])
 
   return null
 }
