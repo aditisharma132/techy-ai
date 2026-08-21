@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env
+.env.*
+.trigger
+.vscode
+.agents
+.claude
+npm-debug.log*
+*.md
+!README.md
