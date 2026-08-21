@@ -603,7 +603,7 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
         {/* AI Architect Tab */}
         <TabsContent value="architect" className="min-h-0 flex-1 overflow-hidden data-[state=active]:flex data-[state=active]:flex-col">
           <div className="flex min-h-0 flex-1 flex-col">
-            <ScrollArea className="flex-1" ref={scrollRef as React.Ref<HTMLDivElement>}>
+            <ScrollArea className="min-h-0 flex-1" ref={scrollRef as React.Ref<HTMLDivElement>}>
               <div className="px-4 pt-3 pb-2">
                 {validatedChatMessages.length === 0 ? (
                   <div className="flex flex-col items-center gap-5 py-8 text-center">
@@ -708,7 +708,7 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
         {/* Chat Tab */}
         <TabsContent value="chat" className="min-h-0 flex-1 overflow-hidden data-[state=active]:flex data-[state=active]:flex-col">
           <div className="flex min-h-0 flex-1 flex-col">
-            <ScrollArea className="flex-1" ref={chatScrollRef as React.Ref<HTMLDivElement>}>
+            <ScrollArea className="min-h-0 flex-1" ref={chatScrollRef as React.Ref<HTMLDivElement>}>
               <div className="px-4 pt-3 pb-2">
                 {validatedChatMessages.length === 0 ? (
                   <div className="flex flex-col items-center gap-4 py-8 text-center">
@@ -838,7 +838,7 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
                 <p className="text-xs text-text-muted">No specs yet. Generate one above.</p>
               </div>
             ) : (
-              <ScrollArea className="flex-1">
+              <ScrollArea className="min-h-0 flex-1">
                 <div className="flex flex-col gap-2 pr-1">
                   {specs.map((spec) => (
                     <div
