@@ -579,7 +579,7 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
 
         {/* AI Architect Tab */}
         <TabsContent value="architect" className="min-h-0 flex-1 overflow-hidden data-[state=active]:flex data-[state=active]:flex-col">
-          <div className="flex h-full flex-col">
+          <div className="flex min-h-0 flex-1 flex-col">
             <ScrollArea className="flex-1" ref={scrollRef as React.Ref<HTMLDivElement>}>
               <div className="px-4 pt-3 pb-2">
                 {validatedChatMessages.length === 0 ? (
@@ -684,7 +684,7 @@ export function AiSidebar({ isOpen, onClose, roomId, projectId }: AiSidebarProps
 
         {/* Chat Tab */}
         <TabsContent value="chat" className="min-h-0 flex-1 overflow-hidden data-[state=active]:flex data-[state=active]:flex-col">
-          <div className="flex h-full flex-col">
+          <div className="flex min-h-0 flex-1 flex-col">
             <ScrollArea className="flex-1" ref={chatScrollRef as React.Ref<HTMLDivElement>}>
               <div className="px-4 pt-3 pb-2">
                 {validatedChatMessages.length === 0 ? (
