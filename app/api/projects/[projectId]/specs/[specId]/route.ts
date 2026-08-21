@@ -20,7 +20,7 @@ export async function GET(
   })
   if (!spec) return Response.json({ error: "Not found" }, { status: 404 })
 
-  const result = await get(spec.filePath, { access: "private" })
+  const result = await get(spec.filePath, { access: "public" })
   if (!result || result.statusCode !== 200 || !result.stream) {
     return Response.json({ error: "File not found" }, { status: 404 })
   }

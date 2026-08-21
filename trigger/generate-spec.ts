@@ -125,7 +125,7 @@ export const generateSpec = schemaTask({
       `specs/${payload.projectId}/${Date.now()}.md`,
       spec,
       {
-        access: "private",
+        access: "public",
         contentType: "text/markdown",
         addRandomSuffix: false,
         allowOverwrite: true,

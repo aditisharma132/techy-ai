@@ -21,7 +21,7 @@ export async function GET(
 
   if (!project?.canvasBlobUrl) return Response.json({ canvas: null })
 
-  const result = await get(project.canvasBlobUrl, { access: "private" })
+  const result = await get(project.canvasBlobUrl, { access: "public" })
   if (!result || result.statusCode !== 200 || !result.stream) return Response.json({ canvas: null })
 
   const canvas: unknown = await new Response(result.stream).json()
@@ -41,7 +41,7 @@ export async function PUT(
 
   const body: unknown = await request.json().catch(() => ({}))
   const blob = await put(`canvas/${projectId}.json`, JSON.stringify(body), {
-    access: "private",
+    access: "public",
     contentType: "application/json",
     addRandomSuffix: false,
     allowOverwrite: true,
